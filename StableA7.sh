@@ -22,13 +22,11 @@ automake libtool openssl tar perl binutils gcc g++ \
                 python3-dev libusbmuxd4 libreadline6-dev libusb-dev \
                 libzip-dev libssl-dev m4 bsdiff qemu uml-utilities virt-manager git wget libguestfs-tools
                 
-cd bin
-chmod +x *
-cd .. 			 
+			 
  mkdir build
   cd build
 
-        libs=( "libusbmuxd" "usbmuxd" "libirecovery" \
+        libs=( "libplist" "libusbmuxd" "usbmuxd" "libirecovery" \
                 "ideviceinstaller" "libideviceactivation" "ifuse" )
                  
                 for i in "${libs[@]}"
@@ -95,7 +93,7 @@ fi
 echo -e "==> Grabbing dependencies and installing!"
 
                 git clone https://github.com/lzfse/lzfse.git
-				git clone https://github.com/s0uthwest/libimobiledevice.git
+				
 				git clone https://github.com/s0uthwest/idevicerestore.git
 				git clone https://github.com/strelokFun/futurerestore.git
 				git clone https://github.com/strelokFun/img4tool.git
@@ -113,15 +111,6 @@ echo -e "==> Grabbing dependencies and installing!"
 				./configure
 				make 
                                 sudo make install
-				cd ..
-                            cd libimobiledevice
-                           git submodule init
-                          git submodule update
-                            
-				./autogen.sh
-				./configure
-				make 
-                              sudo make install
 				cd ..
                                  cd idevicerestore
                            git submodule init
@@ -230,7 +219,7 @@ mkdir StableA7
 if [ -f restore.ipsw ]; then
 cp -r *.ipsw StableA7/restore.ipsw
 fi
-cp -r bin StableA7/bin
+cp -r igetnonce StableA7/igetnonce
 cd StableA7
 
 echo "==> Downloading patches..."
@@ -239,7 +228,7 @@ unzip -q patch.zip
 cp -r stablea7-master-patch/patch .
 rm -r stablea7-master-patch patch.zip
 
-./bin/igetnonce
+./igetnonce
 read -p "[+]Copy and paste idevice and press enter (ex:iPhone6,2): " identifier
             echo $identifier
 
@@ -301,36 +290,8 @@ cd ..
 
 echo "==> Cleaning up..."
 rm -r ibec.im4p ibss.im4p patch restore.ipsw
+
 echo "==> Downloading ipwndfu..."
-if [ $identifier == iPhone6,1 ] || [ $identifier == iPhone6,2 ]; then
-git clone https://github.com/LinusHenze/ipwndfu_public.git
-mv ipwndfu_public ipwndfu
-
-        cd ipwndfu
-        chmod +x ipwndfu
-        until [ $string = 1 ];
-        do
-            
-    
-			 echo -e "[+]The script will run ipwndfu again and again until the device is in PWNDFU mode"
-			
-            read -p "[+]Please put your idevice in dfu mode and press enter"
-            ./ipwndfu -p &> /dev/null
-            ./ipwndfu -p &> /dev/null
-            string=$(lsusb | grep -c "Apple, Inc. Mobile Device (DFU Mode)")
-        done
-        
-        
-        read -p "[+]Please unplug and plug in your idevice again and press enter"
-        ./ipwndfu -p &> /dev/null
-        python rmsigchks.py
-        cd ..
-if [ $string == 1 ]; then
-        echo "We seem to be in pwned DFU mode!"
-
-       fi
-        
-else
 git clone https://github.com/twilightmoon4/ipwndfu_public.git
 mv ipwndfu_public ipwndfu
 
@@ -353,13 +314,11 @@ mv ipwndfu_public ipwndfu
         ./ipwndfu -p &> /dev/null
         python rmsigchks.py
         cd ..
-if [ $string == 1 ]; then
+        
+       if [ $string == 1 ]; then
         echo "We seem to be in pwned DFU mode!"
 
        fi
-fi
-        
-       
 
 	echo "==> Sending patched iBSS/iBEC to device..."
          sudo ip tuntap add dev tap0 mode tap
@@ -368,20 +327,20 @@ fi
          sudo ip link set dev tap0 master virbr0	
          sudo virsh net-autostart default
        
-	./bin/irecovery -f ibss.patched.im4p
+	irecovery -f ibss.patched.im4p
         
-	./bin/irecovery -f ibec.patched.im4p
-
-echo "==> Waiting iDevice..."
-sleep 10
+	irecovery -f ibec.patched.im4p
+        
 echo "==> Downloading OTA manifests..."
 wget -O manifests.zip https://gitlab.com/devluke/stablea7/raw/master/A7_10.3.3_OTA_Manifests.zip -q --show-progress
 unzip -q manifests.zip
 rm manifests.zip
+
+
 	echo "==> Getting ECID and ApNonce..."
-        ./bin/igetnonce
+        ./igetnonce
 	read -p "[+]Copy and paste apnonce and press enter: " apnonce
-            read -p "[+]Copy and paste ecid and press enter: " ecid
+            read -p "[+]Copy and paste ecid and press enter 'iPhone6,2': " ecid
             echo $identifier   
              echo $ecid
               echo $apnonce
@@ -415,7 +374,7 @@ fi
 
 
 	echo "==> Requesting ticket..."
-	./bin/tsschecker -e $ecid -d $identifier -s -o -i 9.9.10.3.3 --buildid 14G60 -m BuildManifest.plist --apnonce $apnonce > /dev/null
+	tsschecker -e $ecid -d $identifier -s -o -i 9.9.10.3.3 --buildid 14G60 -m BuildManifest.plist --apnonce $apnonce > /dev/null
 	mv *.shsh ota.shsh
 
 
@@ -429,24 +388,24 @@ rm -r 10.3.3 ipsw
 	echo "==> Restoring device to 10.3.3..."
 	status=
 	if [ $baseband == true ]; then
-		./bin/futurerestore -t ota.shsh -s sep.im4p -m BuildManifest.plist -b baseband.bbfw -p BuildManifest.plist custom.ipsw
+		futurerestore -t ota.shsh -s sep.im4p -m BuildManifest.plist -b baseband.bbfw -p BuildManifest.plist custom.ipsw
 		status=$?
 	else
-		./bin/futurerestore -t ota.shsh -s sep.im4p -m BuildManifest.plist --no-baseband custom.ipsw
+		futurerestore -t ota.shsh -s sep.im4p -m BuildManifest.plist --no-baseband custom.ipsw
 		status=$?
 	fi
 
 	if [ $status -ne 0 ]; then
 		echo
 		echo "==> Restoring failed. Attempting to exit recovery mode..."
-		./bin/futurerestore --exit-recovery &> /dev/null
+		futurerestore --exit-recovery &> /dev/null
 		if [ $patch == 1 ]; then
 			echo "==> You are using the normal patch which probably caused the restore to fail."
 			read -p "==> Press enter/return to try restoring again with the rsu patch... "
 
 			read -p "==> Please exit DFU mode and press enter/return... "
 			echo "==> Exiting recovery mode..."
-			./bin/futurerestore --exit-recovery &> /dev/null
+			futurerestore --exit-recovery &> /dev/null
 
 		else
 			exit 1

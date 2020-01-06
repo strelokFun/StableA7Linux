@@ -1,6 +1,7 @@
-# StableA7Linux for iOS10.3.3
-
+StableA7Linux for iOS10.3.3
 I come here to release you my beta of the StableA7 port for Linux
+
+Warning: apparently doesn't work on iPads (in momments), only iPhones
 
 Is downgrade for iOS10.3.3 in A7 idevices
 
@@ -18,9 +19,9 @@ Your idevice in DFU mode
 
 => just run:
 
-git clone https://github.com/strelokFun/StableA7Linux.git
+git clone https://gitlab.com/twilightmoon4/stablea7linux.git
 
-cd StableA7Linux
+cd stablea7linux
 
 sudo apt-get update
 
