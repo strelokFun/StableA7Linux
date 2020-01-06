@@ -97,8 +97,8 @@ echo -e "==> Grabbing dependencies and installing!"
                 git clone https://github.com/lzfse/lzfse.git
 				git clone https://github.com/s0uthwest/libimobiledevice.git
 				git clone https://github.com/s0uthwest/idevicerestore.git
-				git clone https://github.com/merculous/futurerestore.git
-				git clone https://github.com/s0uthwest/img4tool.git
+				git clone https://github.com/strelokFun/futurerestore.git
+				git clone https://github.com/strelokFun/img4tool.git
 				git clone https://github.com/tihmstar/tsschecker.git
                                 git clone https://github.com/tihmstar/igetnonce.git
 
@@ -141,7 +141,7 @@ echo -e "==> Grabbing dependencies and installing!"
                            rmdir img4tool
                            git clone https://github.com/s0uthwest/idevicerestore.git
                            git clone https://github.com/s0uthwest/tsschecker.git
-                           git clone https://github.com/s0uthwest/img4tool.git
+                           git clone https://github.com/strelokFun/img4tool.git
                            cd tsschecker
                            cd external
                         rmdir jssy
