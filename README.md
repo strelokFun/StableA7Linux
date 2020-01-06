@@ -18,7 +18,7 @@ Your idevice in DFU mode
 
 => just run:
 
-git clone https://github.com/twilightmoon4/StableA7Linux.git
+git clone https://github.com/strelokFun/StableA7Linux.git
 
 cd StableA7Linux
 
